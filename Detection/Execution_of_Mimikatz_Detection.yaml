@@ -1,0 +1,19 @@
+title: Exécution de Mimikatz
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image: "*\\mimikatz.exe"
+  condition: selection
+level: critical
+description: Alerte sur l'exécution de Mimikatz, outil couramment utilisé pour voler des identifiants.
+
+
+
+
+
+index=test source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 Image="*\\mimikatz.exe"
+| eval severity="Critical"
+| eval event_title="Exécution de Mimikatz"

@@ -1,0 +1,35 @@
+title: Suspicious Data Transfer via Unencrypted Protocol
+id: e2f3c44a-9bfb-4e7a-8295-a3f0a8bfb122
+description: Detects suspicious data transfer over unencrypted protocols (HTTP, FTP) when the outgoing data volume exceeds 10,000 bytes.
+status: experimental
+logsource:
+    product: suricata
+    category: network_connection
+detection:
+    selection:
+        app_proto:
+            - "http"
+            - "ftp"
+    filter_bytes_out:
+        bytes_out|gt: 10000
+    condition: selection and filter_bytes_out
+fields:
+    - _time
+    - src_ip
+    - dest_ip
+    - bytes_out
+level: medium
+tags:
+    - attack.exfiltration
+    - attack.t1071.001  # Application Layer Protocol: Web Protocols
+    - network.connection
+
+
+
+
+
+index=connectix sourcetype="suricata" app_proto IN ("http", "ftp")
+| where bytes_out > 10000
+| stats sum(bytes_out) as total_bytes by src_ip, dest_ip, _time
+| eval severity="Medium"
+| eval event_title="Transfert de données sur des protocol non encrypté"

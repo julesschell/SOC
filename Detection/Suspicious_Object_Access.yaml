@@ -1,0 +1,62 @@
+title: Suspicious Object Access - Potential Privilege Escalation or Data Theft
+id: 9e1f3bde-b236-4d8e-a1d3-67854bc3df57
+description: Detects unusual access to critical system objects or files, indicating potential privilege escalation or data exfiltration activities.
+status: experimental
+logsource:
+    product: windows
+    category: file_access
+detection:
+    selection:
+        EventID: 4663
+    filter_object_access:
+        Object_Type: "File"
+        Object_Name:
+            - "*\\Windows\\System32\\config\\SAM"
+            - "*\\Windows\\System32\\config\\SECURITY"
+            - "*\\Windows\\System32\\config\\SYSTEM"
+            - "*\\Windows\\System32\\lsass.exe"
+            - "*\\Windows\\NTDS\\ntds.dit"
+            - "*\\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion"
+    filter_access_mask:
+        Access_Mask:
+            - "0x10"    # Read or Read Memory
+            - "0x20"    # Write or Modify Memory
+            - "0x40"    # Full Control
+    filter_excluded_process:
+        Process_Name: 
+            - "C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\MsMpEng.exe"
+    condition: selection and (filter_object_access or filter_access_mask) and not filter_excluded_process
+    timeframe: 1h
+    aggregation:
+        - Account_Name
+        - Process_Name
+        - Object_Name
+        - Object_Type
+        - Access_Mask
+    condition: count(Account_Name, Process_Name, Object_Name) > 5
+fields:
+    - _time
+    - Account_Name
+    - Process_Name
+    - Object_Name
+    - Object_Type
+    - Access_Mask
+level: high
+tags:
+    - attack.privilege_escalation
+    - attack.data_exfiltration
+    - attack.persistence
+
+
+
+
+
+index=connectix source=WinEventLog:Security EventCode=4663 
+| where (Object_Type="File" AND Object_Name="*\\Windows\\System32\\config\\SAM" OR Object_Name="*\\Windows\\System32\\config\\SECURITY" 
+         OR Object_Name="*\\Windows\\System32\\lsass.exe" OR Object_Name="*\\Windows\\System32\\config\\SYSTEM" 
+         OR Object_Name="*\\Windows\\NTDS\\ntds.dit" OR Object_Name="*\\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion") 
+       OR (Access_Mask IN ("0x10", "0x20", "0x40") AND Process_Name!="C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\MsMpEng.exe")
+| stats count by Account_Name, Process_Name, Object_Name, Object_Type, Access_Mask, _time
+| where count > 5
+| eval severity="High"
+| eval event_title="Potentielle tentative d'élévation de privilège"

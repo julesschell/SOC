@@ -1,0 +1,39 @@
+title: Suspicious Process Execution via CMD with Known Hacking Tools
+id: 71e5d9a3-5b2a-48f5-9e13-92d3b4626fd0
+description: Detects the execution of potentially malicious or hacking-related tools (such as netcat, socat, plink, etc.) initiated by cmd.exe.
+author: Tuan
+date: 2024/11/09
+logsource:
+  product: windows
+  service: security
+  definition: sysmon
+detection:
+  selection:
+    EventCode: 4688
+    Creator_Process_Name: 'C:\\Windows\\System32\\cmd.exe'
+  filter:
+    New_Process_Name|contains:
+      - 'nc'
+      - 'socat'
+      - 'plink'
+      - 'cryptcat'
+      - 'fpipe'
+      - 'rinetd'
+      - 'meterpreter'
+      - 'cobaltstrike'
+  condition: selection and filter
+falsepositives:
+  - Legitimate use of network tools by system administrators or IT staff for troubleshooting or maintenance
+level: Medium
+tags:
+  - attack.execution
+  - attack.t1059.003  # Command and Scripting Interpreter: Windows Command Shell
+  - attack.t1021      # Remote Services (if applicable to the tools listed)
+
+
+
+
+index=connectix EventCode=4688 Creator_Process_Name="C:\\Windows\\System32\\cmd.exe"
+(New_Process_Name="*nc*" OR New_Process_Name="*socat*" OR New_Process_Name="*plink*" OR New_Process_Name="*cryptcat*" OR New_Process_Name="*fpipe*" OR New_Process_Name="*rinetd*" OR New_Process_Name="*meterpreter*" OR New_Process_Name="*cobaltstrike*")
+| eval severity="Medium"
+| eval event_title="Detection de commande suspecte"

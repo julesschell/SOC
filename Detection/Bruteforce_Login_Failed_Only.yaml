@@ -2,7 +2,6 @@ title: Brute Force Attack Detection
 id: b69c7d84-f498-4827-955a-98fc1b0ea4fb
 description: Detects brute force attempts by identifying multiple failed logon attempts from the same IP or on the same account in a short period of time.
 status: experimental
-author: Joshua GUYOT
 logsource:
   category: authentication
   product: windows
@@ -19,14 +18,19 @@ falsepositives:
 level: high
 tags:
   - attack.bruteforce
+  - attack.T1110.003
 
 
 
-index=windows
+
+
+index=connectix
 sourcetype=WinEventLog
-EventID=4625
+EventCode=4625
 | stats count by user
 | where count > 10
 | table user, count
 | rename user AS "Nom d'utilisateur", count AS "Nombre de tentatives échouées"
 | sort - "Nombre de tentatives échouées"
+| eval severity="High"
+| eval event_title="Détection de tentative de bruteforce"

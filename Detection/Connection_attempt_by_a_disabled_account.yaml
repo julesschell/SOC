@@ -1,0 +1,18 @@
+title: Tentative de connexion par un compte désactivé
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4625
+    Status: "C0000072" 
+  condition: selection
+level: medium
+description: Détecte les tentatives de connexion échouées avec un compte désactivé.
+
+
+
+
+index=test EventCode=4625 Status="C0000072"
+| eval severity="Medium"
+| eval event_title="Détection d'une tentative de connexion par un compte désactivé"

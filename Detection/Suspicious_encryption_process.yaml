@@ -1,0 +1,55 @@
+title: Potential Ransomware Behavior Detected
+id: 12345678-9abc-def0-1234-56789abcdef0
+description: Detects suspicious processes or activities that indicate possible file encryption, typical of ransomware.
+status: experimental
+author: Tuan
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection1:
+    Image:
+      - '*\vssadmin.exe'
+      - '*\wbadmin.exe'
+      - '*\bcdedit.exe'
+      - '*\diskshadow.exe'
+    CommandLine|contains:
+      - 'delete shadows'
+      - 'resize shadowstorage'
+      - 'delete catalog'
+      - '/quiet'
+  
+  selection2:
+    Image:
+      - '*\cipher.exe'
+      - '*\powershell.exe'
+    CommandLine|contains:
+      - 'encrypt'
+      - '-enc'
+  
+  selection3:
+    TargetFilename|endswith:
+      - '.crypt'
+      - '.enc'
+      - '.encrypted'
+      - '.aes'
+
+  condition: selection1 or selection2 or selection3
+falsepositives:
+  - Legitimate use of backup software
+  - Administrative tools for encryption or shadow copy management
+level: high
+tags:
+  - attack.impact
+  - attack.T1486
+
+
+
+
+
+index=connectix EventType=1 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+(Image IN ("*\\vssadmin.exe", "*\\wbadmin.exe", "*\\bcdedit.exe", "*\\diskshadow.exe") AND (CommandLine="*delete shadows*" OR CommandLine="*resize shadowstorage*" OR CommandLine="*delete catalog*" OR CommandLine="*/quiet*")) OR (Image IN ("*\\cipher.exe", "*\\powershell.exe") AND (CommandLine="*encrypt*" OR CommandLine="*-enc*")) OR (TargetFilename IN ("*.crypt", "*.enc", "*.encrypted", "*.aes"))
+| stats count by Image, CommandLine, TargetFilename, ComputerName, User
+| rename Image as "Process", CommandLine as "Command Line", TargetFilename as "File", ComputerName as "Host", User as "Username"
+| eval severity="High"
+| eval event_title="Detection d'encryption de fichier"

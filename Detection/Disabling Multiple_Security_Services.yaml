@@ -1,0 +1,32 @@
+title: Detection of Excessive Disabled Services
+status: experimental
+description: Detects excessive disabled services events in Windows Event Logs
+author: Joshua GUYOT
+  product: windows
+  service: system
+detection:
+  selection:
+    EventID: 7040
+    EventData|contains: 'disabled'
+  condition: selection | count(EventData) by Computer, EventID, UserID >= 10
+fields:
+  - Computer
+  - EventID
+  - UserID
+  - EventData
+falsepositives:
+  - Legitimate administrative activity
+level: high
+
+
+
+
+index=connectix source="WinEventLog:System" EventCode=7040 "disabled" 
+| stats count values(EventData_Xml) as MessageList dc(EventData_Xml) as MessageCount min(_time) as firstTime max(_time) as lastTime by Computer EventCode UserID 
+| rename Computer as dest 
+| where count >=10 
+| `security_content_ctime(firstTime)` 
+| `security_content_ctime(lastTime)` 
+| `windows_excessive_disabled_services_event_filter`
+| eval severity="High"
+| eval event_title="Désactivation de plus de 10 services de sécurité"

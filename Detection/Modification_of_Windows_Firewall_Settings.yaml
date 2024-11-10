@@ -1,0 +1,31 @@
+title: "Windows Firewall Setting Edited"
+id: 12345678-1234-5678-1234-567812345678
+description: "Detects the creation of a new firewall rule on Windows"
+status: stable
+logsource:
+  category: security
+  product: windows
+detection:
+  selection:
+    EventID: 4950
+  condition: selection
+level: Medium
+index: "test"
+fields:
+  - EventID
+  - SourceName
+  - ComputerName
+  - SubjectUserName
+  - SubjectDomainName
+falsepositives:
+  - "Legitimate firewall rule creation by administrators or security software"
+tags:
+  - attack.defense_evasion
+  - attack.t1562.004
+
+
+
+
+index=connectix EventCode=4950 source="WinEventLog:Security"
+| eval severity="Medium"
+| eval event_title="Modification des paramètres du pare-feu"

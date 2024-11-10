@@ -1,0 +1,23 @@
+title: Utilisation d'outils de planification pour exécution de commandes
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image: "*\\at.exe"
+  selection2:
+    EventID: 1
+    Image: "*\\schtasks.exe"
+  condition: selection or selection2
+level: medium
+description: Détecte l'utilisation d'at.exe ou de schtasks.exe pour planifier l'exécution de tâches malveillantes.
+
+
+
+
+
+index="connectix"  sourcetype="wineventlog"  EventCode=4688 
+| search (New_Process_Name="*\\at.exe" OR New_Process_Name="*\\schtasks.exe")
+| eval severity="Medium"
+| eval event_title="Exécution de commandes via at.exe ou schtasks.exe"

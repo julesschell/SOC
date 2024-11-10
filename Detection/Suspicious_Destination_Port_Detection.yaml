@@ -1,0 +1,45 @@
+title: Suspicious Destination Port Detection
+id: 34b3e03d-f29c-4d78-bf9e-8f1b2f6877e1
+description: Detects connections to unusual or suspicious destination ports that are commonly used for malicious activity.
+status: experimental
+logsource:
+    product: suricata
+    category: network_connection
+detection:
+    selection:
+        dest_port:
+            - 6667      # IRC (often used in botnets)
+            - 8080      # HTTP alternative (can be used for evasion)
+            - 8443      # HTTPS alternative
+            - 22        # SSH (often used in unauthorized access)
+            - 3389      # RDP (remote access protocol)
+            - 135       # DCE/RPC (exploitable services)
+            - 445       # SMB (vulnerable to exploits)
+            - 1433      # SQL Server (targeted in database attacks)
+            - 4444      # Commonly used for backdoors
+            - 12345     # NetBus (backdoor)
+            - 2323      # Telnet alternative
+            - 31337     # Elite port, used in backdoors
+            - 49152     # Range used in some malware
+            - 52869     # Known for malicious activity
+    condition: selection
+fields:
+    - _time
+    - src_ip
+    - dest_ip
+    - dest_port
+level: low
+tags:
+    - attack.command_and_control
+    - attack.exfiltration
+    - attack.remote_access
+    - network.connection
+
+
+
+
+index=test sourcetype="suricata"
+| where dest_port IN (6667, 8080, 8443, 22, 3389, 135, 445, 1433, 4444, 12345, 2323, 31337, 49152, 52869)
+| stats count by src_ip, dest_ip, dest_port, _time
+| eval severity="Low"
+| eval event_title="Connection à un port potentiellement vulnérable"

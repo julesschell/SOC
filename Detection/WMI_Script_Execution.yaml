@@ -1,0 +1,57 @@
+title: Suspicious Wmiprvse.exe Process Activity
+id: 8ae0d7f4-7d4f-11ee-8a58-0242ac120002
+description: Detects suspicious instances of wmiprvse.exe based on abnormal parent process, command-line arguments, or unusual execution context.
+status: experimental
+author: Corentin Berlot
+logsource:
+  category: process_creation
+  product: windows
+detection:
+  selection:
+    Image: 'C:\Windows\System32\wbem\wmiprvse.exe'
+  filter_parent:
+    ParentImage:
+      - 'C:\Windows\System32\services.exe'  # Process started normally by services.exe
+      - 'C:\Windows\System32\wininit.exe'   # Common parent process for legitimate activity
+  filter_commandline:
+    CommandLine: 
+      - '*wmic*'   # Ignore if part of common wmic commands
+      - '*query*'  # Ignore if it's a normal query
+  suspicious_parent:
+    ParentImage:
+      - '*powershell.exe'     # Powershell starting wmiprvse.exe
+      - '*cmd.exe'            # Command Prompt starting wmiprvse.exe
+      - '*explorer.exe'       # User launched manually
+      - '*mshta.exe'          # Known process abused in attacks
+      - '*svchost.exe'        # svchost starting wmiprvse is unusual
+  suspicious_commandline:
+    CommandLine|contains:
+      - '-enc'              # Encoded commands often used in malicious activity
+      - '-nop'              # No profile for Powershell often used in attacks
+      - '-c'                # Command flag that might indicate suspicious behavior
+      - 'http'              # Remote connection
+  condition: selection and (suspicious_parent or suspicious_commandline) and not (filter_parent or filter_commandline)
+fields:
+  - CommandLine
+  - ParentImage
+  - Image
+  - User
+falsepositives:
+  - Legitimate WMI queries or operations by administrators
+  - Specific enterprise applications relying on WMI in unusual ways
+level: high
+tags:
+  - attack.execution
+  - attack.persistence
+  - attack.t1071
+
+
+
+
+
+index=connectix Image="C:\\Windows\\System32\\wbem\\wmiprvse.exe"
+| eval suspicious_parent=if(like(ParentImage, "%powershell.exe") OR like(ParentImage, "%cmd.exe") OR like(ParentImage, "%explorer.exe") OR like(ParentImage, "%mshta.exe") OR like(ParentImage, "%svchost.exe"), 1, 0)
+| eval suspicious_commandline=if(match(CommandLine, "(?i)-enc|-nop|-c|http"), 1, 0)
+| where suspicious_parent=1 OR suspicious_commandline=1
+| eval severity="High"
+| eval event_title="Exécution de scripts WMI"
