@@ -1,0 +1,35 @@
+# Description
+
+Détecte la désinstallation de logiciel de sécurité, une action qui peut être utilisée pour masquer l'activité de logiciels malveillants ou de compromission de comptes.
+
+# Criticité : critical
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+index=test EventCode=11724 ProductName="*Antivirus*"
+| stats count by _time, Computer, User, ProductName=
+| eval severity="critical"
+| eval event_title="Tentative de désinstallation de logiciel de sécurité"
+
+
+# Règle SIGMA
+
+title: Tentative de désinstallation de logiciel de sécurité
+logsource:
+  product: windows
+  service: application
+detection:
+  selection:
+    EventID: 11724
+    ProductName: "*Antivirus*"
+  condition: selection
+level: critical
+description: Détecte la désinstallation d'un logiciel de sécurité, signe potentiel d'une compromission.
+
+# Explication
+
+Cette règle SIGMA permet de détecter les événements de désinstallation de logiciel de sécurité. Elle s'appuie sur EventID 11724, un événement de sécurité enregistré dans Windows lorsque l’action de désinstallation de logiciel de sécurité est exécutée. La désinstallation de logiciel de sécurité peut être un signe de compromission, car elle peut être utilisée pour masquer l'activité de logiciels malveillants ou de compromission de comptes.

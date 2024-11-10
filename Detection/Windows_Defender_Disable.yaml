@@ -1,0 +1,37 @@
+# Description
+
+Detection de la désactivation de Windows Defender par un utilisateur. Cette action peut être utilisée pour masquer l'activité de logiciels malveillants ou de compromission de comptes.
+
+# Criticité : High
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+index=connectix source="WinEventLog:System" EventCode=5004 SourceName="Microsoft-Windows-Windows Defender" Status="disabled"
+| stats count by Computer, UserID
+| where count >= 1
+| eval severity="High"
+| eval event_title="Désactivation de Windows Defender"
+
+
+# Règle SIGMA
+
+title: Désactivation de Windows Defender
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 5004
+    Provider_Name: ""Microsoft-Windows-Windows Defender""
+    Status: "disabled"
+  condition: selection
+level: High
+description: Alerte si Windows Defender est désactivé, signe potentiel de compromission.
+
+# Explication
+
+Cette règle SIGMA permet de détecter les événements de désactivation de Windows Defender. Elle s'appuie sur EventID 5004, un événement de sécurité enregistré dans Windows lorsque l’action de désactivation de Windows Defender est exécutée. La désactivation de Windows Defender peut être un signe de compromission, car elle peut être utilisée pour masquer l'activité de logiciels malveillants ou de compromission de comptes.
