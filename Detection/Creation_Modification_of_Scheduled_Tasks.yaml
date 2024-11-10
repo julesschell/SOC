@@ -1,0 +1,20 @@
+title: Modification des tâches planifiées
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4698
+  condition: selection
+level: medium
+description: Détecte la création des tâches planifiées, une méthode courante pour la persistance.
+
+
+
+
+
+index=test EventCode=4698
+| stats count by _time, Computer, User, TaskName
+| rename Computer as host, User as user
+| eval severity="Medium"
+| eval event_title="Création d'une tache planifiées"

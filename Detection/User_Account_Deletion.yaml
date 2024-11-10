@@ -1,0 +1,18 @@
+title: Suppression d'un compte utilisateur
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4726
+  condition: selection
+level: low
+description: Détecte la suppression de comptes utilisateurs, souvent utilisée pour masquer l'activité de comptes compromis.
+
+
+
+
+
+index=test source=WinEventLog:Security EventCode=4726
+| eval severity="Low"
+| eval event_title="Suppression d'un compte utilisateur"

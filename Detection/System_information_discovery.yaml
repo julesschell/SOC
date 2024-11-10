@@ -1,0 +1,84 @@
+title: System Information Discovery Detection - Multiple Commands Executed
+id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+description: Detects the execution of multiple suspicious commands within a specific timeframe indicating possible system discovery or malicious activity.
+status: experimental
+logsource:
+    category: process_creation
+    product: windows
+detection:
+    selection:
+        EventID: 4688
+    condition: selection and (
+        Process_Command_Line|contains:
+            - "bot.ps1"
+            - "cmd.exe /c"
+            - "Invoke-WebRequest"
+            - "IEX"
+            - "Invoke-Expression"
+            - "DownloadString"
+            - "Invoke-Mimikatz"
+            - "Mimikatz"
+            - "certutil"
+            - "bitsadmin"
+            - "regsvr32"
+            - "rundll32"
+            - "wmic process"
+            - "powershell.exe -nop -w hidden"
+            - "-EncodedCommand"
+            - "-NoProfile"
+            - "-ExecutionPolicy Bypass"
+            - "cscript"
+            - "wscript"
+            - "sc.exe"
+            - "schtasks.exe"
+        )
+    timeframe: 1h
+    aggregation:
+        - host
+        - user
+    condition: count(host, user) >= 3
+fields:
+    - _time
+    - host
+    - user
+    - Process_Command_Line
+level: high
+tags:
+    - attack.execution
+    - attack.t1087
+    - attack.discovery
+    - attack.powershell
+
+
+
+
+
+index=connectix EventCode=4688 
+(Process_Command_Line="*bot.ps1*" 
+OR Process_Command_Line="*cmd.exe /c*" 
+OR Process_Command_Line="*Invoke-WebRequest*" 
+OR Process_Command_Line="*IEX*" 
+OR Process_Command_Line="*Invoke-Expression*" 
+OR Process_Command_Line="*DownloadString*" 
+OR Process_Command_Line="*Invoke-Mimikatz*" 
+OR Process_Command_Line="*Mimikatz*" 
+OR Process_Command_Line="*certutil*" 
+OR Process_Command_Line="*bitsadmin*" 
+OR Process_Command_Line="*regsvr32*" 
+OR Process_Command_Line="*rundll32*" 
+OR Process_Command_Line="*wmic process*" 
+OR Process_Command_Line="*powershell.exe -nop -w hidden*" 
+OR Process_Command_Line="* -EncodedCommand*" 
+OR Process_Command_Line="* -NoProfile*" 
+OR Process_Command_Line="* -ExecutionPolicy Bypass*" 
+OR Process_Command_Line="*cscript*" 
+OR Process_Command_Line="*wscript*" 
+OR Process_Command_Line="*sc.exe*" 
+OR Process_Command_Line="*schtasks.exe*")
+| bin _time span=1h
+| stats count by host, user, _time
+| where count >= 3
+| eval alert="System Information Discovery Detection - Multiple Commands Executed"
+| table _time, host, user, count, alert
+| eval severity="High"
+| eval event_title="Tentative de récupération d'information système"

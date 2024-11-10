@@ -1,0 +1,55 @@
+title: Détection d'une tentative d'escalation de privilege
+id: a45e95f6-dec4-43ab-b3ba-91471e993c9a
+status: experimental
+description: "Cette règle détectera si un utilisateur change de niveau de privilège, passant d'un rôle standard à un rôle avec des droits administratifs 
+ou s'octroie des permissions élevées, indiquant une potentielle élévation de privilège non autorisée."
+author: Jules S.
+date: 2024-10-23
+tags:
+    - attack.t1547.001
+logsource:
+    product: windows
+    category: sysmon
+detection:
+    selection1:
+        selection_privilege_escalation:
+            EventID: 4672
+            Privileges|contains: "SeDebugPrivilege"
+        selection_admin_group_change:
+            EventID: 4728
+            GroupName|contains: "Administrators"
+        selection_token_impersonation:
+            EventID: 4673
+            ServiceName|contains: "TokenElevation"
+        selection_service_account:
+            EventID: 4697
+            ServiceFileName|contains: "svchost.exe"
+    condition: selection1 or selection2
+falsepositives:
+    - Lancement de logiciels légitimes au démarrage mis en place à l'installation d'un programme
+level: high
+fields:
+    - _time
+    - user
+    - src_ip
+    - dest_ip
+    - Privileges
+    - GroupName
+    - ServiceName
+    - ServiceFileName
+
+
+
+
+
+index=connectix 
+(
+    (EventCode=4672 AND "SeDebugPrivilege")
+    OR (EventCode=4728 AND "Administrators")
+    OR (EventCode=4673 AND "TokenElevation")
+    OR (EventCode=4697 AND "svchost.exe")
+)
+| table _time, user, src_ip, dest_ip, Privileges, GroupName, ServiceName, ServiceFileName
+| rename user AS "User", src_ip AS "Source IP", dest_ip AS "Destination IP"
+| eval severity="High"
+| eval event_title="Tentative d'élévation de privilège"

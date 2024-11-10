@@ -1,0 +1,53 @@
+title: Suspicious User Account Creation
+id: b7f5e3d8-45e1-4b63-b7e6-f93bfae80b5b
+description: Detects user account creation events that occur during unusual hours or have elevated privileges, or specific naming conventions.
+status: experimental
+logsource:
+    category: account_creation
+    product: windows
+detection:
+    selection:
+        EventID: 4720
+    filter_time:
+        CreationTime|timeframe: 'night'
+    filter_conditions:
+        - Account_Domain: "Administrators"
+        - Privileges: "SeDebugPrivilege"
+    filter_account_name:
+        Account_Name|contains:
+            - "svc"
+            - "admin"
+            - "backup"
+            - "test"
+    filter_account_control:
+        User_Account_Control:
+            - "Password Not Required"
+            - "Account Enabled"
+    condition: selection and (filter_time or filter_conditions or filter_account_name or filter_account_control)
+fields:
+    - _time
+    - Account_Name
+    - Account_Domain
+    - User_Account_Control
+    - Creator_User
+    - creation_time
+level: high
+tags:
+    - attack.persistence
+    - attack.privilege_escalation
+    - attack.account_creation.
+
+
+
+
+
+index=connectix EventCode=4720
+| eval creation_time=strftime(_time, "%H:%M:%S")
+| where (creation_time > "18:00:00" OR creation_time < "08:00:00") 
+    OR (Account_Domain="Administrators" OR Privileges="SeDebugPrivilege")
+    OR (Account_Name="*svc*" OR Account_Name="*admin*" OR Account_Name="*backup*" OR Account_Name="*test*") 
+    OR (User_Account_Control="Password Not Required" OR User_Account_Control="Account Enabled") 
+| stats count by _time, Account_Name, Account_Domain, User_Account_Control, Creator_User, creation_time
+| rename Account_Name AS "New Account Name", Account_Domain AS "Account Domain", User_Account_Control AS "User Account Control", Creator_User AS "Created By", creation_time AS "Creation Time"
+| eval severity="High"
+| eval event_title="Création de nouveaux utilisateur suspicieux"

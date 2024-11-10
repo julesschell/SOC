@@ -1,0 +1,36 @@
+title: High Number of Connections from Single Source IP
+id: 98b4f9d6-67e9-4b2c-b0c9-dba25b50d1ab
+description: Detects a high number of network connections from a single source IP, indicating potential DDoS or scanning activity.
+status: experimental
+author: user
+logsource:
+  category: network_traffic
+  product: suricata
+detection:
+  selection:
+    sourcetype: suricata
+    event_type: "netflow"
+    _time: 
+      - ">1h"
+  condition: selection
+  aggregation:
+    field: src_ip
+    threshold: 3600
+  timeframe: 1h
+fields:
+  - src_ip
+  - count
+falsepositives:
+  - High traffic from legitimate services
+  - Misconfigured servers
+level: high
+tags:
+  - attack.dos
+  - attack.network
+  - attack.t1071
+
+
+
+
+
+index=connectix sourcetype=suricata event_type="netflow" earliest=-1h | stats count by src_ip | where count > 3600

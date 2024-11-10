@@ -1,0 +1,38 @@
+title: Suspicious ICMP IPv6 Activity Detection
+id: f4bcb700-8765-4a9e-b6c7-72d2e9e9e3c4
+description: Detects high volume of IPv6 ICMP activity in a short period, which may indicate reconnaissance, ICMP tunneling, or DoS attacks.
+status: experimental
+logsource:
+    product: suricata
+    category: network_connection
+detection:
+    selection:
+        proto: "IPv6-ICMP"
+    timeframe: 1m
+    aggregation:
+        - src_ip
+        - dest_ip
+        - count: 50
+    condition: selection and count(src_ip, dest_ip) > 50
+fields:
+    - _time
+    - src_ip
+    - dest_ip
+    - proto
+level: high
+tags:
+    - attack.command_and_control
+    - attack.reconnaissance
+    - attack.exfiltration
+    - network.connection
+
+
+
+
+
+index=connectix sourcetype="suricata" proto="IPv6-ICMP"
+| bin _time span=1m
+| stats count by src_ip, dest_ip, _time
+| where count > 50
+| eval severity="High"
+| eval event_title="ICMP IPv6 scan"

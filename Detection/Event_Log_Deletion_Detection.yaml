@@ -1,0 +1,17 @@
+title: Suppression des journaux d'événements Windows
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 1102
+  condition: selection
+level: high
+description: Détecte la suppression des journaux d'événements, souvent signe d'une tentative de dissimulation.
+
+
+
+
+index="test" EventCode=1102 source="WinEventLog:Security"
+| eval severity="High"
+| eval event_title="Suppression des journaux d'événements"

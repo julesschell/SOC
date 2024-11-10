@@ -1,0 +1,15 @@
+title: Modification des politiques de sécurité locales
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4704
+  condition: selection
+level: medium
+description: Détecte toute modification des politiques de sécurité, souvent utilisées pour élever des privilèges.
+
+
+
+
+index=connectix source=WinEventLog:Security EventCode=4704

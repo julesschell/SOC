@@ -1,0 +1,43 @@
+title: Détection de modifications dans la configuration de Sysmon
+id: abcd1234-5678-90ef-ghij-klmnopqrstuv
+status: experimental
+description: Cette règle détecte toute modification ou tentative de désactivation de Sysmon, pouvant indiquer une tentative de masquer des activités suspectes.
+author: Jules S.
+date: 2024-11-07
+tags:
+    - attack.t1562.001
+logsource:
+    product: windows
+    service: security
+detection:
+    selection1:
+        EventCode: 7040
+        ServiceName: "Sysmon"
+    selection2:
+        EventCode: 7045
+        ServiceName: "Sysmon"
+    selection3:
+        EventCode: 7036
+        ServiceName: "Sysmon"
+    selection4:
+        EventCode: 7035
+        ServiceName: "Sysmon"
+    condition: selection1 or selection2 or selection3 or selection4
+fields:
+    - _time
+    - EventCode
+    - ServiceName
+    - Message
+    - UserName
+    - src_ip
+falsepositives:
+    - Maintenance ou mise à jour planifiée par l'administrateur
+level: medium
+
+
+
+
+index="connectix" sourcetype=WinEventLog EventCode=7040 OR EventCode=7045 OR EventCode=7036 OR EventCode=7035 EventCode=7040
+| search (ServiceName="*Sysmon*" OR Message="*Sysmon*")
+| eval severity="Medium"
+| eval event_title="Modification de la configuration Sysmon"

@@ -1,0 +1,38 @@
+title: Suspicious DNS Anomaly Detection (Potential Tunneling or C2)
+id: e9b72fd0-7a1e-4c25-b7f5-1d1f543b83f3
+description: Detects high-frequency DNS requests within a short time frame, which may indicate DNS tunneling or command and control (C2) communication.
+status: experimental
+logsource:
+    product: suricata
+    category: network_connection
+detection:
+    selection:
+        app_proto: "dns"
+    timeframe: 1m
+    aggregation:
+        - src_ip
+        - dest_ip
+        - count: 10
+    condition: selection and count(src_ip, dest_ip) > 10
+fields:
+    - _time
+    - src_ip
+    - dest_ip
+    - app_proto
+    - count
+level: high
+tags:
+    - attack.command_and_control
+    - attack.tunneling
+    - network.connection
+
+
+
+
+
+index=connectix sourcetype="suricata" app_proto="dns"
+| bin _time span=1m
+| stats count by src_ip, dest_ip, _time
+| where count > 10
+| eval severity="High"
+| eval event_title="DNS Tunneling or C2"

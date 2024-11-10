@@ -1,0 +1,18 @@
+title: Modification des paramètres de pare-feu Windows
+logsource:
+  product: windows
+  service: security
+detection:
+  selection:
+    EventID: 4947
+  condition: selection
+level: high
+description: Détecte les modifications non autorisées dans la configuration du pare-feu Windows.
+
+
+
+
+
+index=connectix source="*WinEventLog*"  EventCode=4947
+| eval severity="High"
+| eval event_title="Modification des règles de pare-feu"

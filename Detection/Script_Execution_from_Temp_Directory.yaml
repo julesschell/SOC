@@ -1,0 +1,19 @@
+title: Exécution de scripts depuis un répertoire temporaire
+logsource:
+  product: windows
+  service: sysmon
+detection:
+  selection:
+    EventID: 1
+    Image: "*\\temp\\*.ps1"
+  condition: selection
+level: high
+description: Détecte les scripts PowerShell exécutés depuis des répertoires temporaires, souvent associés aux malwares.
+
+
+
+
+
+index=connectix source=WinEventLog:Microsoft-Windows-Sysmon/Operational EventCode=1 (Image="*\\temp\\*.ps1" OR Image="*\\temp\\*.exe")
+| eval severity="High"
+| eval event_title="Exécution de scripts depuis un répertoire temporaire"
