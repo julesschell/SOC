@@ -1,5 +1,6 @@
 {% for result in jsout['results'] %}
 - **Alerte** : {{ result['event_title'] }}
+  - Severity : **{{ result['severity'] }}**
   - Source : **{{ result['source'] }}**
   - Horodatage : {{ datetime.datetime.fromisoformat(result['_time']) }}
   - Instance Splunk : {{ result['host'] }}
