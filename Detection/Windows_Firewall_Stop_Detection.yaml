@@ -20,8 +20,6 @@ title: Détection de l'arrêt du pare-feu Windows
 id: b67f8c3e-3a21-4b8e-9f2c-8d9e3a8c9c1a
 status: experimental
 description: Cette règle détecte l'arrêt du pare-feu Windows, ce qui peut indiquer une tentative de désactivation de la sécurité réseau.
-author: Jules S.
-date: 2024-11-07
 tags:
     - attack.t1562.004
 logsource:

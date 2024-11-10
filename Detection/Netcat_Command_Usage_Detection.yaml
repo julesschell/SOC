@@ -23,8 +23,6 @@ index=connectix EventCode=4688 Creator_Process_Name="C:\\Windows\\System32\\cmd.
 title: Suspicious Process Execution via CMD with Known Hacking Tools
 id: 71e5d9a3-5b2a-48f5-9e13-92d3b4626fd0
 description: Detects the execution of potentially malicious or hacking-related tools (such as netcat, socat, plink, etc.) initiated by cmd.exe.
-author: Tuan
-date: 2024/11/09
 logsource:
   product: windows
   service: security

@@ -24,8 +24,6 @@ title: Détection des connexions SSH par le port 22 via Suricata
 id: 1a2b3c4d-5678-90ef-ghij-klmnopqrstuv
 status: experimental
 description: Cette règle détecte les connexions SSH en analysant les flux réseau sur le port 22, capturées par Suricata.
-author: Jules S.
-date: 2024-11-07
 tags:
     - attack.t1040
     - attack.t1021.004

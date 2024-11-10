@@ -24,8 +24,6 @@ index=connectix sourcetype=suricata
 title: Port Scanning Detection with High Number of Destination Ports or IPs
 id: d9b3e8e3-5a5b-4dbb-aabf-7b4f9a0c4f35
 description: Detects potential port scanning by a source IP attempting to connect to more than 20 unique destination ports or IPs within a one-hour period.
-author: Joshua
-date: 2024/11/09
 logsource:
   product: network
   service: ids

@@ -23,7 +23,6 @@ title: Suspicious Wmiprvse.exe Process Activity
 id: 8ae0d7f4-7d4f-11ee-8a58-0242ac120002
 description: Detects suspicious instances of wmiprvse.exe based on abnormal parent process, command-line arguments, or unusual execution context.
 status: experimental
-author: Corentin Berlot
 logsource:
   category: process_creation
   product: windows
@@ -65,8 +64,6 @@ tags:
   - attack.execution
   - attack.persistence
   - attack.t1071
-
-
 
 
 # Explication

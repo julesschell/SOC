@@ -31,7 +31,6 @@ detection:
     EventID: 4950
   condition: selection
 level: Medium
-index: "test"
 fields:
   - EventID
   - SourceName

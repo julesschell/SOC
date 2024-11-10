@@ -21,7 +21,6 @@ title: High Number of Connections from Single Source IP
 id: 98b4f9d6-67e9-4b2c-b0c9-dba25b50d1ab
 description: Detects a high number of network connections from a single source IP, indicating potential DDoS or scanning activity.
 status: experimental
-author: user
 logsource:
   category: network_traffic
   product: suricata

@@ -24,8 +24,6 @@ title: Détection de modifications dans la configuration de Sysmon
 id: abcd1234-5678-90ef-ghij-klmnopqrstuv
 status: experimental
 description: Cette règle détecte toute modification ou tentative de désactivation de Sysmon, pouvant indiquer une tentative de masquer des activités suspectes.
-author: Jules S.
-date: 2024-11-07
 tags:
     - attack.t1562.001
 logsource:

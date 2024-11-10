@@ -26,7 +26,6 @@ title: Potential Ransomware Behavior Detected
 id: 12345678-9abc-def0-1234-56789abcdef0
 description: Detects suspicious processes or activities that indicate possible file encryption, typical of ransomware.
 status: experimental
-author: Tuan
 logsource:
   category: process_creation
   product: windows

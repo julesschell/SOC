@@ -28,7 +28,6 @@ index=connectix source="WinEventLog:System" EventCode=7040 "disabled"
 title: Detection of Excessive Disabled Services
 status: experimental
 description: Detects excessive disabled services events in Windows Event Logs
-author: Joshua GUYOT
 logsource:
   product: windows
   service: system
