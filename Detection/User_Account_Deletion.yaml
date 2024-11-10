@@ -6,9 +6,7 @@ Détecte la suppression de comptes utilisateurs, une action qui peut être utili
 
 # Outils
 
-    SIEM : pour capturer et analyser les logs de sécurité des événements liés aux comptes.
-    EDR : pour surveiller en temps réel les changements apportés aux comptes utilisateurs.
-    Active Directory : pour auditer les modifications et suppressions de comptes au niveau de l'annuaire.
+Sysmon
 
 # Règle SPL
 

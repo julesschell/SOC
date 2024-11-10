@@ -6,9 +6,7 @@ Détecte l'exécution de plusieurs commandes suspectes dans un intervalle de tem
 
 # Outils
 
-    SIEM : pour analyser les logs de création de processus et surveiller les commandes suspectes exécutées dans un court laps de temps.
-    EDR : pour capturer les événements de processus en temps réel et alerter sur les commandes d'exploitation courantes.
-    Sysmon : pour surveiller les activités de processus de commande sur les hôtes Windows.
+Sysmon
 
 # Règle SPL
 

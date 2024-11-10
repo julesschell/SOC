@@ -6,10 +6,7 @@ Détecte des activités suspectes de wmiprvse.exe basées sur des processus pare
 
 # Outils
 
-SIEM : pour l'agrégation et la surveillance des logs des processus créés.
-EDR (Endpoint Detection and Response) : pour la surveillance des processus en temps réel.
-Analyseurs de comportements : pour détecter des exécutions inhabituelles de processus sur les hôtes Windows.
-Sysmon : capture de données supplémentaires sur l'exécution de wmiprvse.exe en définissant des règles Sysmon spécifiques.
+Sysmon
 
 # Règle SPL
 

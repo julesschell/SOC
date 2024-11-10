@@ -6,9 +6,7 @@ Cette règle détecte l'arrêt du pare-feu Windows, une action qui pourrait indi
 
 # Outils
 
-    SIEM : pour centraliser et analyser les logs de sécurité, incluant les événements de pare-feu.
-    EDR : pour surveiller en temps réel les changements dans les services de sécurité.
-    GPO : pour définir et surveiller des politiques de pare-feu afin de restreindre la désactivation manuelle.
+Sysmon
 
 # Règle SPL
 

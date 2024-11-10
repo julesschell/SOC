@@ -6,9 +6,7 @@ Cette règle détecte l'ajout ou la modification d'un fichier dans des répertoi
 
 # Outils
 
-    SIEM : pour l'agrégation et la surveillance des événements Sysmon.
-    EDR : pour surveiller les modifications de fichiers dans des répertoires critiques.
-    Sysmon : pour configurer une règle de surveillance sur les répertoires de démarrage de Windows et détecter les changements.
+Sysmon
 
 # Règle SPL
 
