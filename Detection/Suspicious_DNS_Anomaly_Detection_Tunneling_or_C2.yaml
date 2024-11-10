@@ -1,3 +1,27 @@
+# Description 
+
+Cette règle détecte un nombre élevé de requêtes DNS dans un court laps de temps, ce qui pourrait indiquer un tunneling DNS ou une communication de type command and control (C2).
+
+# Criticité : **HIGH**
+
+# Outils
+
+Suricata
+
+# Règle SPL
+
+```
+index=connectix sourcetype="suricata" app_proto="dns"
+| bin _time span=1m
+| stats count by src_ip, dest_ip, _time
+| where count > 10
+| eval severity="High"
+| eval event_title="DNS Tunneling or C2"
+```
+
+# Règle SIGMA
+
+```
 title: Suspicious DNS Anomaly Detection (Potential Tunneling or C2)
 id: e9b72fd0-7a1e-4c25-b7f5-1d1f543b83f3
 description: Detects high-frequency DNS requests within a short time frame, which may indicate DNS tunneling or command and control (C2) communication.
@@ -25,14 +49,8 @@ tags:
     - attack.command_and_control
     - attack.tunneling
     - network.connection
+```
 
+# Explication
 
-
-
-
-index=connectix sourcetype="suricata" app_proto="dns"
-| bin _time span=1m
-| stats count by src_ip, dest_ip, _time
-| where count > 10
-| eval severity="High"
-| eval event_title="DNS Tunneling or C2"
+La règle identifie des anomalies dans le trafic DNS en détectant un nombre élevé de requêtes DNS provenant d'une même source vers une même destination dans une période de 1 minute. Ces anomalies peuvent être indicatives de tentatives de tunneling DNS ou de communication avec un serveur de commande et contrôle (C2), qui sont des tactiques utilisées par des acteurs malveillants pour exfiltrer des données ou contrôler des machines compromises.

@@ -1,3 +1,30 @@
+# Description 
+
+Cette règle détecte un accès inhabituel à des objets ou fichiers systèmes critiques, ce qui peut indiquer une tentative d'escalade de privilèges ou une activité d'exfiltration de données.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Windows (File Access)
+
+# Règle SPL
+
+```
+index=connectix source=WinEventLog:Security EventCode=4663 
+| where (Object_Type="File" AND Object_Name="*\\Windows\\System32\\config\\SAM" OR Object_Name="*\\Windows\\System32\\config\\SECURITY" 
+         OR Object_Name="*\\Windows\\System32\\lsass.exe" OR Object_Name="*\\Windows\\System32\\config\\SYSTEM" 
+         OR Object_Name="*\\Windows\\NTDS\\ntds.dit" OR Object_Name="*\\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion") 
+       OR (Access_Mask IN ("0x10", "0x20", "0x40") AND Process_Name!="C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\MsMpEng.exe")
+| stats count by Account_Name, Process_Name, Object_Name, Object_Type, Access_Mask, _time
+| where count > 5
+| eval severity="High"
+| eval event_title="Potentielle tentative d'élévation de privilège"
+```
+
+# Règle SIGMA
+
+```
 title: Suspicious Object Access - Potential Privilege Escalation or Data Theft
 id: 9e1f3bde-b236-4d8e-a1d3-67854bc3df57
 description: Detects unusual access to critical system objects or files, indicating potential privilege escalation or data exfiltration activities.
@@ -46,17 +73,8 @@ tags:
     - attack.privilege_escalation
     - attack.data_exfiltration
     - attack.persistence
+```
 
+# Explication
 
-
-
-
-index=connectix source=WinEventLog:Security EventCode=4663 
-| where (Object_Type="File" AND Object_Name="*\\Windows\\System32\\config\\SAM" OR Object_Name="*\\Windows\\System32\\config\\SECURITY" 
-         OR Object_Name="*\\Windows\\System32\\lsass.exe" OR Object_Name="*\\Windows\\System32\\config\\SYSTEM" 
-         OR Object_Name="*\\Windows\\NTDS\\ntds.dit" OR Object_Name="*\\REGISTRY\\MACHINE\\SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion") 
-       OR (Access_Mask IN ("0x10", "0x20", "0x40") AND Process_Name!="C:\\ProgramData\\Microsoft\\Windows Defender\\Platform\\MsMpEng.exe")
-| stats count by Account_Name, Process_Name, Object_Name, Object_Type, Access_Mask, _time
-| where count > 5
-| eval severity="High"
-| eval event_title="Potentielle tentative d'élévation de privilège"
+La règle détecte des accès inhabituels ou suspects à des objets sensibles du système Windows tels que les fichiers de configuration du système, les fichiers d'authentification ou les fichiers de registre. L'accès avec des masques de permissions spécifiques (lecture, écriture ou contrôle complet) est également surveillé, à moins qu'il ne provienne du processus de sécurité Microsoft Windows Defender.

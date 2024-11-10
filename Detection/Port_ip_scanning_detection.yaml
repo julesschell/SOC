@@ -1,3 +1,26 @@
+# Description
+Cette règle détecte un balayage de ports ou d'IP potentiel effectué par une adresse IP source tentant de se connecter à plus de 20 ports ou IPs uniques dans un délai d'une heure. Cela peut être un indicateur d'une tentative d'attaque de type port scanning.
+
+# Criticité : **Medium**
+
+# Outils
+
+Suricata (IDS)
+
+# Règle SPL
+
+```spl
+index=connectix sourcetype=suricata
+| bin _time span=1h
+| stats dc(dest_port) as num_dest_port dc(dest_ip) as num_dest_ip by src_ip, _time
+| where num_dest_port > 50 OR num_dest_ip > 50
+| eval severity="Medium"
+| eval event_title="Détection de balayage de ports et/ou d'ip"
+```
+
+# Règle SIGMA
+
+```yaml
 title: Port Scanning Detection with High Number of Destination Ports or IPs
 id: d9b3e8e3-5a5b-4dbb-aabf-7b4f9a0c4f35
 description: Detects potential port scanning by a source IP attempting to connect to more than 20 unique destination ports or IPs within a one-hour period.
@@ -20,14 +43,9 @@ level: medium
 tags:
   - attack.discovery
   - attack.T1046
+```
 
+# Explication
 
-
-
-
-index=connectix sourcetype=suricata
-| bin _time span=1h
-| stats dc(dest_port) as num_dest_port dc(dest_ip) as num_dest_ip by src_ip, _time
-| where num_dest_port > 50 OR num_dest_ip > 50
-| eval severity="Medium"
-| eval event_title="Détection de balayage de ports et/ou d'ip"
+Cette règle déclenche une alerte lorsqu'une adresse IP source tente de se connecter à un nombre excessif de ports ou d'adresses IP différentes dans un délai d'une heure. Un tel comportement est souvent associé à des techniques de reconnaissance réseau, telles que le balayage de ports, utilisées dans le cadre d'une tentative d'attaque (reconnaissance) sur le réseau cible.
+Les faux positifs peuvent se produire lorsque des outils de maintenance ou d'audit réseau légitimes sont utilisés par les équipes IT ou de sécurité.

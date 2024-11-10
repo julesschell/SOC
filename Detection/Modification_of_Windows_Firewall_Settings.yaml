@@ -1,6 +1,27 @@
-title: "Windows Firewall Setting Edited"
+# Description 
+
+Cette règle détecte la création de nouvelles règles de pare-feu sur un système Windows, ce qui peut indiquer une tentative de manipulation ou de contournement de la sécurité du système.
+
+# Criticité : **MEDIUM**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=connectix EventCode=4950 source="WinEventLog:Security"
+| eval severity="Medium"
+| eval event_title="Modification des paramètres du pare-feu"
+```
+
+# Règle SIGMA
+
+```
+title: Windows Firewall Setting Edited
 id: 12345678-1234-5678-1234-567812345678
-description: "Detects the creation of a new firewall rule on Windows"
+description: Detects the creation of a new firewall rule on Windows
 status: stable
 logsource:
   category: security
@@ -22,10 +43,8 @@ falsepositives:
 tags:
   - attack.defense_evasion
   - attack.t1562.004
+```
 
+# Explication
 
-
-
-index=connectix EventCode=4950 source="WinEventLog:Security"
-| eval severity="Medium"
-| eval event_title="Modification des paramètres du pare-feu"
+Cette règle est déclenchée lors de la création d'une nouvelle règle de pare-feu dans les journaux Windows, ce qui pourrait être une tentative malveillante de modifier les paramètres de sécurité du pare-feu pour faciliter des activités non autorisées.

@@ -1,3 +1,23 @@
+# Description
+
+Détecte la suppression de comptes utilisateurs, une action qui peut être utilisée pour masquer l'activité de comptes compromis. Cette suppression peut être le signe d'une tentative d'effacement de traces ou de compromission d'accès.
+
+# Criticité : LOW
+
+# Outils
+
+    SIEM : pour capturer et analyser les logs de sécurité des événements liés aux comptes.
+    EDR : pour surveiller en temps réel les changements apportés aux comptes utilisateurs.
+    Active Directory : pour auditer les modifications et suppressions de comptes au niveau de l'annuaire.
+
+# Règle SPL
+
+index=test source=WinEventLog:Security EventCode=4726
+| eval severity="Low"
+| eval event_title="Suppression d'un compte utilisateur"
+
+# Règle SIGMA
+
 title: Suppression d'un compte utilisateur
 logsource:
   product: windows
@@ -9,10 +29,7 @@ detection:
 level: low
 description: Détecte la suppression de comptes utilisateurs, souvent utilisée pour masquer l'activité de comptes compromis.
 
+# Explication
 
+Cette règle SIGMA permet de détecter les événements de suppression de comptes utilisateurs. Elle s'appuie sur EventID 4726, un événement de sécurité enregistré dans Windows lorsque l’action de suppression de compte est exécutée. Bien que la suppression d’un compte puisse parfois être légitime, elle est souvent associée à des tentatives de dissimulation d'activité malveillante, notamment en cas de compromission de comptes.
 
-
-
-index=test source=WinEventLog:Security EventCode=4726
-| eval severity="Low"
-| eval event_title="Suppression d'un compte utilisateur"

@@ -1,3 +1,26 @@
+# Description 
+
+Cette règle détecte un transfert de données suspect sur des protocoles non encryptés (HTTP, FTP) lorsque le volume de données sortantes dépasse 10 000 octets.
+
+# Criticité : **MEDIUM**
+
+# Outils
+
+Suricata
+
+# Règle SPL
+
+```
+index=connectix sourcetype="suricata" app_proto IN ("http", "ftp")
+| where bytes_out > 10000
+| stats sum(bytes_out) as total_bytes by src_ip, dest_ip, _time
+| eval severity="Medium"
+| eval event_title="Transfert de données sur des protocol non encrypté"
+```
+
+# Règle SIGMA
+
+```
 title: Suspicious Data Transfer via Unencrypted Protocol
 id: e2f3c44a-9bfb-4e7a-8295-a3f0a8bfb122
 description: Detects suspicious data transfer over unencrypted protocols (HTTP, FTP) when the outgoing data volume exceeds 10,000 bytes.
@@ -23,13 +46,8 @@ tags:
     - attack.exfiltration
     - attack.t1071.001  # Application Layer Protocol: Web Protocols
     - network.connection
+```
 
+# Explication
 
-
-
-
-index=connectix sourcetype="suricata" app_proto IN ("http", "ftp")
-| where bytes_out > 10000
-| stats sum(bytes_out) as total_bytes by src_ip, dest_ip, _time
-| eval severity="Medium"
-| eval event_title="Transfert de données sur des protocol non encrypté"
+Cette règle permet de détecter les transferts de données potentiellement suspects utilisant des protocoles non sécurisés (HTTP, FTP), en vérifiant les volumes de données sortantes. Si un volume supérieur à 10 000 octets est détecté, cela peut indiquer un transfert de données malveillant ou une exfiltration.

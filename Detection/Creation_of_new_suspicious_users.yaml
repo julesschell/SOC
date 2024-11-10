@@ -1,3 +1,31 @@
+# Description 
+
+Cette règle sera levée en cas de création de comptes utilisateurs dans des circonstances suspectes, notamment en dehors des heures habituelles, avec des privilèges élevés, ou en utilisant des conventions de nommage spécifiques.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=connectix EventCode=4720
+| eval creation_time=strftime(_time, "%H:%M:%S")
+| where (creation_time > "18:00:00" OR creation_time < "08:00:00") 
+    OR (Account_Domain="Administrators" OR Privileges="SeDebugPrivilege")
+    OR (Account_Name="*svc*" OR Account_Name="*admin*" OR Account_Name="*backup*" OR Account_Name="*test*") 
+    OR (User_Account_Control="Password Not Required" OR User_Account_Control="Account Enabled") 
+| stats count by _time, Account_Name, Account_Domain, User_Account_Control, Creator_User, creation_time
+| rename Account_Name AS "New Account Name", Account_Domain AS "Account Domain", User_Account_Control AS "User Account Control", Creator_User AS "Created By", creation_time AS "Creation Time"
+| eval severity="High"
+| eval event_title="Création de nouveaux utilisateur suspicieux"
+```
+
+# Règle SIGMA
+
+```
 title: Suspicious User Account Creation
 id: b7f5e3d8-45e1-4b63-b7e6-f93bfae80b5b
 description: Detects user account creation events that occur during unusual hours or have elevated privileges, or specific naming conventions.
@@ -35,19 +63,9 @@ level: high
 tags:
     - attack.persistence
     - attack.privilege_escalation
-    - attack.account_creation.
+    - attack.account_creation
+```
 
+# Explication
 
-
-
-
-index=connectix EventCode=4720
-| eval creation_time=strftime(_time, "%H:%M:%S")
-| where (creation_time > "18:00:00" OR creation_time < "08:00:00") 
-    OR (Account_Domain="Administrators" OR Privileges="SeDebugPrivilege")
-    OR (Account_Name="*svc*" OR Account_Name="*admin*" OR Account_Name="*backup*" OR Account_Name="*test*") 
-    OR (User_Account_Control="Password Not Required" OR User_Account_Control="Account Enabled") 
-| stats count by _time, Account_Name, Account_Domain, User_Account_Control, Creator_User, creation_time
-| rename Account_Name AS "New Account Name", Account_Domain AS "Account Domain", User_Account_Control AS "User Account Control", Creator_User AS "Created By", creation_time AS "Creation Time"
-| eval severity="High"
-| eval event_title="Création de nouveaux utilisateur suspicieux"
+Cette règle détecte la création de comptes utilisateurs dans des conditions inhabituelles, telles que la création en dehors des heures normales de travail, avec des privilèges élevés, ou en utilisant des conventions de nommage potentiellement suspectes (par exemple, "admin", "svc", "backup", "test").

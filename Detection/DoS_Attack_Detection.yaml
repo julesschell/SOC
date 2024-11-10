@@ -1,3 +1,22 @@
+# Description 
+
+Cette règle détecte un nombre élevé de connexions réseau provenant d'une même adresse IP source, ce qui peut indiquer une activité de type DDoS ou de balayage.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Suricata
+
+# Règle SPL
+
+```
+index=connectix sourcetype=suricata event_type="netflow" earliest=-1h | stats count by src_ip | where count > 3600
+```
+
+# Règle SIGMA
+
+```
 title: High Number of Connections from Single Source IP
 id: 98b4f9d6-67e9-4b2c-b0c9-dba25b50d1ab
 description: Detects a high number of network connections from a single source IP, indicating potential DDoS or scanning activity.
@@ -28,9 +47,8 @@ tags:
   - attack.dos
   - attack.network
   - attack.t1071
+```
 
+# Explication
 
-
-
-
-index=connectix sourcetype=suricata event_type="netflow" earliest=-1h | stats count by src_ip | where count > 3600
+Cette règle surveille les flux réseau à la recherche de connexions excessives provenant d'une même adresse IP source. Si le nombre de connexions dépasse le seuil défini (3600 dans ce cas), la règle se déclenche, signalant une activité potentiellement malveillante, comme une attaque DDoS ou un balayage de réseau.

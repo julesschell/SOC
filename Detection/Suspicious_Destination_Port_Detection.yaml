@@ -1,3 +1,26 @@
+# Description 
+
+Cette règle détecte les connexions vers des ports de destination inhabituels ou suspects, souvent utilisés dans des activités malveillantes.
+
+# Criticité : **LOW**
+
+# Outils
+
+Suricata
+
+# Règle SPL
+
+```
+index=test sourcetype="suricata"
+| where dest_port IN (6667, 8080, 8443, 22, 3389, 135, 445, 1433, 4444, 12345, 2323, 31337, 49152, 52869)
+| stats count by src_ip, dest_ip, dest_port, _time
+| eval severity="Low"
+| eval event_title="Connection à un port potentiellement vulnérable"
+```
+
+# Règle SIGMA
+
+```
 title: Suspicious Destination Port Detection
 id: 34b3e03d-f29c-4d78-bf9e-8f1b2f6877e1
 description: Detects connections to unusual or suspicious destination ports that are commonly used for malicious activity.
@@ -34,12 +57,8 @@ tags:
     - attack.exfiltration
     - attack.remote_access
     - network.connection
+```
 
+# Explication
 
-
-
-index=test sourcetype="suricata"
-| where dest_port IN (6667, 8080, 8443, 22, 3389, 135, 445, 1433, 4444, 12345, 2323, 31337, 49152, 52869)
-| stats count by src_ip, dest_ip, dest_port, _time
-| eval severity="Low"
-| eval event_title="Connection à un port potentiellement vulnérable"
+Cette règle permet de détecter des connexions réseau sur des ports généralement associés à des activités malveillantes, telles que les IRC utilisés par les botnets, les ports pour l'accès à distance non autorisé ou les ports vulnérables à des exploits. La règle est utile pour repérer des activités suspectes ou des tentatives d'accès malveillant dans le réseau.

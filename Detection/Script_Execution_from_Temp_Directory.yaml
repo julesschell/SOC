@@ -1,3 +1,24 @@
+# Description 
+
+Cette règle détecte les scripts PowerShell exécutés depuis des répertoires temporaires, souvent associés aux malwares.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=connectix source=WinEventLog:Microsoft-Windows-Sysmon/Operational EventCode=1 (Image="*\\temp\\*.ps1" OR Image="*\\temp\\*.exe")
+| eval severity="High"
+| eval event_title="Exécution de scripts depuis un répertoire temporaire"
+```
+
+# Règle SIGMA
+
+```
 title: Exécution de scripts depuis un répertoire temporaire
 logsource:
   product: windows
@@ -9,11 +30,8 @@ detection:
   condition: selection
 level: high
 description: Détecte les scripts PowerShell exécutés depuis des répertoires temporaires, souvent associés aux malwares.
+```
 
+# Explication
 
-
-
-
-index=connectix source=WinEventLog:Microsoft-Windows-Sysmon/Operational EventCode=1 (Image="*\\temp\\*.ps1" OR Image="*\\temp\\*.exe")
-| eval severity="High"
-| eval event_title="Exécution de scripts depuis un répertoire temporaire"
+Cette règle détecte l'exécution de scripts PowerShell depuis un répertoire temporaire, un comportement souvent observé dans les attaques malveillantes. Les scripts exécutés depuis des répertoires temporaires sont un indicateur courant d'activité suspecte ou malveillante.

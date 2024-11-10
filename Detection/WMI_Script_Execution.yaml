@@ -1,3 +1,27 @@
+#Description
+
+Détecte des activités suspectes de wmiprvse.exe basées sur des processus parents inhabituels, des arguments en ligne de commande anormaux, ou un contexte d'exécution inhabituel. Cette règle cible les cas où wmiprvse.exe est lancé dans des conditions pouvant indiquer une tentative d'abus ou de persistance malveillante.
+
+# Criticité : HIGH
+
+# Outils
+
+SIEM : pour l'agrégation et la surveillance des logs des processus créés.
+EDR (Endpoint Detection and Response) : pour la surveillance des processus en temps réel.
+Analyseurs de comportements : pour détecter des exécutions inhabituelles de processus sur les hôtes Windows.
+Sysmon : capture de données supplémentaires sur l'exécution de wmiprvse.exe en définissant des règles Sysmon spécifiques.
+
+# Règle SPL
+
+index=connectix Image="C:\\Windows\\System32\\wbem\\wmiprvse.exe"
+| eval suspicious_parent=if(like(ParentImage, "%powershell.exe") OR like(ParentImage, "%cmd.exe") OR like(ParentImage, "%explorer.exe") OR like(ParentImage, "%mshta.exe") OR like(ParentImage, "%svchost.exe"), 1, 0)
+| eval suspicious_commandline=if(match(CommandLine, "(?i)-enc|-nop|-c|http"), 1, 0)
+| where suspicious_parent=1 OR suspicious_commandline=1
+| eval severity="High"
+| eval event_title="Exécution de scripts WMI"
+
+# Règle SIGMA
+
 title: Suspicious Wmiprvse.exe Process Activity
 id: 8ae0d7f4-7d4f-11ee-8a58-0242ac120002
 description: Detects suspicious instances of wmiprvse.exe based on abnormal parent process, command-line arguments, or unusual execution context.
@@ -48,10 +72,6 @@ tags:
 
 
 
+# Explication
 
-index=connectix Image="C:\\Windows\\System32\\wbem\\wmiprvse.exe"
-| eval suspicious_parent=if(like(ParentImage, "%powershell.exe") OR like(ParentImage, "%cmd.exe") OR like(ParentImage, "%explorer.exe") OR like(ParentImage, "%mshta.exe") OR like(ParentImage, "%svchost.exe"), 1, 0)
-| eval suspicious_commandline=if(match(CommandLine, "(?i)-enc|-nop|-c|http"), 1, 0)
-| where suspicious_parent=1 OR suspicious_commandline=1
-| eval severity="High"
-| eval event_title="Exécution de scripts WMI"
+La règle SIGMA cherche les exécutions de wmiprvse.exe (Windows Management Instrumentation Provider Service) avec des contextes inhabituels, ce qui pourrait indiquer une activité malveillante. Typiquement, wmiprvse.exe est lancé par des processus légitimes comme services.exe ou wininit.exe. Cependant, si ce processus est lancé par powershell.exe, cmd.exe, explorer.exe, mshta.exe ou svchost.exe, cela pourrait indiquer un comportement malveillant. De plus, des arguments de ligne de commande tels que -enc, -nop, -c ou des connexions HTTP peuvent être des indicateurs d’une compromission. Les faux positifs incluent les requêtes légitimes d'administration via WMI et certaines applications métier spécifiques.

@@ -1,3 +1,24 @@
+# Description 
+
+Cette règle détecte l'exécution de Mimikatz, un outil souvent utilisé pour voler des identifiants ou exécuter des attaques de type credential dumping.
+
+# Criticité : **CRITICAL**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=test source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 Image="*\\mimikatz.exe"
+| eval severity="Critical"
+| eval event_title="Exécution de Mimikatz"
+```
+
+# Règle SIGMA
+
+```
 title: Exécution de Mimikatz
 logsource:
   product: windows
@@ -9,11 +30,8 @@ detection:
   condition: selection
 level: critical
 description: Alerte sur l'exécution de Mimikatz, outil couramment utilisé pour voler des identifiants.
+```
 
+# Explication
 
-
-
-
-index=test source="WinEventLog:Microsoft-Windows-Sysmon/Operational" EventCode=1 Image="*\\mimikatz.exe"
-| eval severity="Critical"
-| eval event_title="Exécution de Mimikatz"
+Cette règle est déclenchée lorsqu'un processus correspondant à `mimikatz.exe` est exécuté sur un système. Mimikatz est un outil très utilisé dans les attaques visant à extraire des identifiants ou réaliser des actions de credential dumping, ce qui justifie un niveau de criticité élevé.

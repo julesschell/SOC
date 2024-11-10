@@ -1,3 +1,25 @@
+# Description 
+
+Cette règle détecte les connexions SSH en analysant les flux réseau sur le port 22, capturées par Suricata.
+
+# Criticité : **MEDIUM**
+
+# Outils
+
+Suricata
+
+# Règle SPL
+
+```
+index="connectix" sourcetype=suricata dest_port=22
+| stats count by src_ip, dest_ip
+| eval severity="Medium"
+| eval event_title="Connection SSH détecté"
+```
+
+# Règle SIGMA
+
+```
 title: Détection des connexions SSH par le port 22 via Suricata
 id: 1a2b3c4d-5678-90ef-ghij-klmnopqrstuv
 status: experimental
@@ -26,11 +48,8 @@ falsepositives:
     - Connexions SSH légitimes pour l'administration système
     - Tests de réseau autorisés
 level: medium
+```
 
+# Explication
 
-
-
-index="connectix"  sourcetype=suricata dest_port=22
-| stats count by src_ip, dest_ip
-| eval severity="Medium"
-| eval event_title="Connection SSH détecté"
+Cette règle analyse le trafic réseau sur le port 22 pour détecter les connexions SSH. Elle peut signaler des connexions SSH légitimes ou des tests de réseau autorisés, mais elle est particulièrement utile pour identifier des connexions SSH malveillantes ou non autorisées.

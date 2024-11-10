@@ -1,3 +1,31 @@
+# Description 
+
+Cette règle sera levée en cas de tentative de brute force en identifiant plusieurs tentatives de connexion échouées provenant de la même IP ou du même compte en peu de temps.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=connectix
+sourcetype=WinEventLog
+EventCode=4625
+| stats count by user
+| where count > 10
+| table user, count
+| rename user AS "Nom d'utilisateur", count AS "Nombre de tentatives échouées"
+| sort - "Nombre de tentatives échouées"
+| eval severity="High"
+| eval event_title="Détection de tentative de bruteforce"
+```
+
+# Règle SIGMA
+
+```
 title: Brute Force Attack Detection
 id: b69c7d84-f498-4827-955a-98fc1b0ea4fb
 description: Detects brute force attempts by identifying multiple failed logon attempts from the same IP or on the same account in a short period of time.
@@ -14,23 +42,13 @@ fields:
   - EventID
   - user
 falsepositives:
-  - Legitimate failed logon attempts,  forgotten password
+  - Legitimate failed logon attempts, forgotten password
 level: high
 tags:
   - attack.bruteforce
   - attack.T1110.003
+```
 
+# Explication
 
-
-
-
-index=connectix
-sourcetype=WinEventLog
-EventCode=4625
-| stats count by user
-| where count > 10
-| table user, count
-| rename user AS "Nom d'utilisateur", count AS "Nombre de tentatives échouées"
-| sort - "Nombre de tentatives échouées"
-| eval severity="High"
-| eval event_title="Détection de tentative de bruteforce"
+Cette règle détecte les tentatives de brute force en comptabilisant les événements de connexion échouée (EventID 4625) pour un utilisateur donné. Si plus de 10 tentatives échouées sont détectées dans une période d'une heure, la règle est déclenchée.

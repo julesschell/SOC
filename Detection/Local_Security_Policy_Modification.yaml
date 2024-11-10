@@ -1,3 +1,22 @@
+# Description 
+
+Cette règle détecte toute modification des politiques de sécurité locales sur un système Windows, ce qui peut indiquer une tentative d'élévation de privilèges ou de contournement des contrôles de sécurité.
+
+# Criticité : **MEDIUM**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=connectix source=WinEventLog:Security EventCode=4704
+```
+
+# Règle SIGMA
+
+```
 title: Modification des politiques de sécurité locales
 logsource:
   product: windows
@@ -8,8 +27,8 @@ detection:
   condition: selection
 level: medium
 description: Détecte toute modification des politiques de sécurité, souvent utilisées pour élever des privilèges.
+```
 
+# Explication
 
-
-
-index=connectix source=WinEventLog:Security EventCode=4704
+Cette règle est déclenchée lorsqu'une modification des politiques de sécurité locales est enregistrée dans les journaux de sécurité Windows. Ces changements peuvent être liés à des tentatives d'élévation de privilèges ou à des actions malveillantes visant à contourner les contrôles de sécurité.

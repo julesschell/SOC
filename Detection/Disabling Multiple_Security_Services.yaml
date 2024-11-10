@@ -1,7 +1,35 @@
+# Description 
+
+Cette règle sera levée en cas de détection d'une désactivation excessive de services sur un système Windows, ce qui pourrait indiquer une tentative de désactivation de mécanismes de sécurité.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=connectix source="WinEventLog:System" EventCode=7040 "disabled" 
+| stats count values(EventData_Xml) as MessageList dc(EventData_Xml) as MessageCount min(_time) as firstTime max(_time) as lastTime by Computer EventCode UserID 
+| rename Computer as dest 
+| where count >=10 
+| `security_content_ctime(firstTime)` 
+| `security_content_ctime(lastTime)` 
+| `windows_excessive_disabled_services_event_filter`
+| eval severity="High"
+| eval event_title="Désactivation de plus de 10 services de sécurité"
+```
+
+# Règle SIGMA
+
+```
 title: Detection of Excessive Disabled Services
 status: experimental
 description: Detects excessive disabled services events in Windows Event Logs
 author: Joshua GUYOT
+logsource:
   product: windows
   service: system
 detection:
@@ -17,16 +45,8 @@ fields:
 falsepositives:
   - Legitimate administrative activity
 level: high
+```
 
+# Explication
 
-
-
-index=connectix source="WinEventLog:System" EventCode=7040 "disabled" 
-| stats count values(EventData_Xml) as MessageList dc(EventData_Xml) as MessageCount min(_time) as firstTime max(_time) as lastTime by Computer EventCode UserID 
-| rename Computer as dest 
-| where count >=10 
-| `security_content_ctime(firstTime)` 
-| `security_content_ctime(lastTime)` 
-| `windows_excessive_disabled_services_event_filter`
-| eval severity="High"
-| eval event_title="Désactivation de plus de 10 services de sécurité"
+Cette règle détecte un grand nombre d'événements où des services sont désactivés sur une machine Windows, ce qui pourrait indiquer une tentative malveillante de désactiver des mécanismes de sécurité du système. L'événement 7040 avec des données contenant "disabled" est recherché, et si plus de 10 occurrences sont trouvées, la règle se déclenche.

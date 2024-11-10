@@ -1,3 +1,49 @@
+# Description
+
+Détecte l'exécution de plusieurs commandes suspectes dans un intervalle de temps spécifique, pouvant indiquer une activité de découverte système ou une activité malveillante. Ce type de comportement peut correspondre à une tentative de reconnaissance ou de compromission avancée.
+
+# Criticité : HIGH
+
+# Outils
+
+    SIEM : pour analyser les logs de création de processus et surveiller les commandes suspectes exécutées dans un court laps de temps.
+    EDR : pour capturer les événements de processus en temps réel et alerter sur les commandes d'exploitation courantes.
+    Sysmon : pour surveiller les activités de processus de commande sur les hôtes Windows.
+
+# Règle SPL
+
+index=connectix EventCode=4688 
+(Process_Command_Line="*bot.ps1*" 
+OR Process_Command_Line="*cmd.exe /c*" 
+OR Process_Command_Line="*Invoke-WebRequest*" 
+OR Process_Command_Line="*IEX*" 
+OR Process_Command_Line="*Invoke-Expression*" 
+OR Process_Command_Line="*DownloadString*" 
+OR Process_Command_Line="*Invoke-Mimikatz*" 
+OR Process_Command_Line="*Mimikatz*" 
+OR Process_Command_Line="*certutil*" 
+OR Process_Command_Line="*bitsadmin*" 
+OR Process_Command_Line="*regsvr32*" 
+OR Process_Command_Line="*rundll32*" 
+OR Process_Command_Line="*wmic process*" 
+OR Process_Command_Line="*powershell.exe -nop -w hidden*" 
+OR Process_Command_Line="* -EncodedCommand*" 
+OR Process_Command_Line="* -NoProfile*" 
+OR Process_Command_Line="* -ExecutionPolicy Bypass*" 
+OR Process_Command_Line="*cscript*" 
+OR Process_Command_Line="*wscript*" 
+OR Process_Command_Line="*sc.exe*" 
+OR Process_Command_Line="*schtasks.exe*")
+| bin _time span=1h
+| stats count by host, user, _time
+| where count >= 3
+| eval alert="System Information Discovery Detection - Multiple Commands Executed"
+| table _time, host, user, count, alert
+| eval severity="High"
+| eval event_title="Tentative de récupération d'information système"
+
+# Règle SIGMA
+
 title: System Information Discovery Detection - Multiple Commands Executed
 id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
 description: Detects the execution of multiple suspicious commands within a specific timeframe indicating possible system discovery or malicious activity.
@@ -49,36 +95,8 @@ tags:
     - attack.discovery
     - attack.powershell
 
+# Explication
+
+Cette règle SIGMA vise à détecter l'exécution de commandes multiples, qui sont souvent utilisées dans des scénarios de découverte système ou d'attaque malveillante. Elle repose sur EventID 4688, indiquant la création d'un processus avec une ligne de commande spécifique, incluant des outils et commandes connus comme Invoke-WebRequest, certutil, Mimikatz, ou encore des commandes PowerShell comme -EncodedCommand et -ExecutionPolicy Bypass. En surveillant ces commandes exécutées au moins trois fois par le même hôte ou utilisateur dans un délai d'une heure, cette règle permet de repérer des activités potentiellement malveillantes.
 
 
-
-
-index=connectix EventCode=4688 
-(Process_Command_Line="*bot.ps1*" 
-OR Process_Command_Line="*cmd.exe /c*" 
-OR Process_Command_Line="*Invoke-WebRequest*" 
-OR Process_Command_Line="*IEX*" 
-OR Process_Command_Line="*Invoke-Expression*" 
-OR Process_Command_Line="*DownloadString*" 
-OR Process_Command_Line="*Invoke-Mimikatz*" 
-OR Process_Command_Line="*Mimikatz*" 
-OR Process_Command_Line="*certutil*" 
-OR Process_Command_Line="*bitsadmin*" 
-OR Process_Command_Line="*regsvr32*" 
-OR Process_Command_Line="*rundll32*" 
-OR Process_Command_Line="*wmic process*" 
-OR Process_Command_Line="*powershell.exe -nop -w hidden*" 
-OR Process_Command_Line="* -EncodedCommand*" 
-OR Process_Command_Line="* -NoProfile*" 
-OR Process_Command_Line="* -ExecutionPolicy Bypass*" 
-OR Process_Command_Line="*cscript*" 
-OR Process_Command_Line="*wscript*" 
-OR Process_Command_Line="*sc.exe*" 
-OR Process_Command_Line="*schtasks.exe*")
-| bin _time span=1h
-| stats count by host, user, _time
-| where count >= 3
-| eval alert="System Information Discovery Detection - Multiple Commands Executed"
-| table _time, host, user, count, alert
-| eval severity="High"
-| eval event_title="Tentative de récupération d'information système"

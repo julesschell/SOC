@@ -1,3 +1,27 @@
+# Description 
+
+Cette règle détecte des processus ou des activités suspectes qui indiquent une possible tentative de chiffrement de fichiers, typique des comportements de ransomware.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Sysmon (Windows)
+
+# Règle SPL
+
+```
+index=connectix EventType=1 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
+(Image IN ("*\\vssadmin.exe", "*\\wbadmin.exe", "*\\bcdedit.exe", "*\\diskshadow.exe") AND (CommandLine="*delete shadows*" OR CommandLine="*resize shadowstorage*" OR CommandLine="*delete catalog*" OR CommandLine="*/quiet*")) OR (Image IN ("*\\cipher.exe", "*\\powershell.exe") AND (CommandLine="*encrypt*" OR CommandLine="*-enc*")) OR (TargetFilename IN ("*.crypt", "*.enc", "*.encrypted", "*.aes"))
+| stats count by Image, CommandLine, TargetFilename, ComputerName, User
+| rename Image as "Process", CommandLine as "Command Line", TargetFilename as "File", ComputerName as "Host", User as "Username"
+| eval severity="High"
+| eval event_title="Detection d'encryption de fichier"
+```
+
+# Règle SIGMA
+
+```
 title: Potential Ransomware Behavior Detected
 id: 12345678-9abc-def0-1234-56789abcdef0
 description: Detects suspicious processes or activities that indicate possible file encryption, typical of ransomware.
@@ -42,14 +66,8 @@ level: high
 tags:
   - attack.impact
   - attack.T1486
+```
 
+# Explication
 
-
-
-
-index=connectix EventType=1 sourcetype="WinEventLog:Microsoft-Windows-Sysmon/Operational"
-(Image IN ("*\\vssadmin.exe", "*\\wbadmin.exe", "*\\bcdedit.exe", "*\\diskshadow.exe") AND (CommandLine="*delete shadows*" OR CommandLine="*resize shadowstorage*" OR CommandLine="*delete catalog*" OR CommandLine="*/quiet*")) OR (Image IN ("*\\cipher.exe", "*\\powershell.exe") AND (CommandLine="*encrypt*" OR CommandLine="*-enc*")) OR (TargetFilename IN ("*.crypt", "*.enc", "*.encrypted", "*.aes"))
-| stats count by Image, CommandLine, TargetFilename, ComputerName, User
-| rename Image as "Process", CommandLine as "Command Line", TargetFilename as "File", ComputerName as "Host", User as "Username"
-| eval severity="High"
-| eval event_title="Detection d'encryption de fichier"
+La règle détecte les processus ou commandes liés à la gestion des copies de sécurité ou des tentatives d'encryption de fichiers, caractéristiques des ransomwares. Elle s'appuie sur des programmes légitimes utilisés par des attaquants pour modifier ou supprimer des copies de sauvegarde, ainsi que pour chiffrer des fichiers. Des extensions de fichiers spécifiques (.crypt, .enc, .aes, etc.) sont également vérifiées pour détecter des fichiers potentiellement chiffrés.

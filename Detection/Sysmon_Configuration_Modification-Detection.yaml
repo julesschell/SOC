@@ -1,3 +1,25 @@
+# Description
+
+Cette règle détecte toute modification ou tentative de désactivation de Sysmon, pouvant indiquer une tentative de masquer des activités suspectes.
+
+# Criticité : **Medium**
+
+# Outils
+
+Windows (Security)
+
+# Règle SPL
+
+```
+index="connectix" sourcetype=WinEventLog EventCode=7040 OR EventCode=7045 OR EventCode=7036 OR EventCode=7035 EventCode=7040
+| search (ServiceName="*Sysmon*" OR Message="*Sysmon*")
+| eval severity="Medium"
+| eval event_title="Modification de la configuration Sysmon"
+```
+
+# Règle SIGMA
+
+```
 title: Détection de modifications dans la configuration de Sysmon
 id: abcd1234-5678-90ef-ghij-klmnopqrstuv
 status: experimental
@@ -33,11 +55,8 @@ fields:
 falsepositives:
     - Maintenance ou mise à jour planifiée par l'administrateur
 level: medium
+```
 
+# Explication
 
-
-
-index="connectix" sourcetype=WinEventLog EventCode=7040 OR EventCode=7045 OR EventCode=7036 OR EventCode=7035 EventCode=7040
-| search (ServiceName="*Sysmon*" OR Message="*Sysmon*")
-| eval severity="Medium"
-| eval event_title="Modification de la configuration Sysmon"
+La règle surveille les événements relatifs à Sysmon (ServiceName="Sysmon") et détecte toute modification ou tentative de désactivation des services Sysmon via les codes d'événements 7035, 7036, 7040 et 7045. Cela pourrait indiquer une tentative de manipulation ou de masquage des activités suspectes par un attaquant.

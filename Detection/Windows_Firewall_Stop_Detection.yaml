@@ -1,3 +1,23 @@
+# Description
+
+Cette règle détecte l'arrêt du pare-feu Windows, une action qui pourrait indiquer une tentative de désactivation de la sécurité réseau, compromettant ainsi la protection contre les connexions non autorisées.
+
+# Criticité : MEDIUM
+
+# Outils
+
+    SIEM : pour centraliser et analyser les logs de sécurité, incluant les événements de pare-feu.
+    EDR : pour surveiller en temps réel les changements dans les services de sécurité.
+    GPO : pour définir et surveiller des politiques de pare-feu afin de restreindre la désactivation manuelle.
+
+# Règle SPL
+
+index="connectix" sourcetype=WinEventLog EventCode=5025
+| eval severity="Medium"
+| eval event_title="Arrêt du pare-feu Windows"
+
+# Règle SIGMA
+
 title: Détection de l'arrêt du pare-feu Windows
 id: b67f8c3e-3a21-4b8e-9f2c-8d9e3a8c9c1a
 status: experimental
@@ -18,10 +38,6 @@ falsepositives:
     - Arrêt légitime pour maintenance ou mise à jour système
 level: medium
 
+# Explication
 
-
-
-
-index="connectix" sourcetype=WinEventLog EventCode=5025
-| eval severity="Medium"
-| eval event_title="Arrêt du pare-feu Windows"
+Cette règle SIGMA permet de détecter les événements où le pare-feu Windows est désactivé. L'événement spécifique, EventID 5025, est déclenché lorsque le pare-feu est arrêté, avec Provider_Name correspondant à "Microsoft-Windows-Windows Firewall With Advanced Security". Ce type de désactivation peut être le signe d'une tentative d'affaiblissement de la sécurité réseau, bien qu'il existe des faux positifs, notamment lors de la maintenance ou de mises à jour légitimes du système.

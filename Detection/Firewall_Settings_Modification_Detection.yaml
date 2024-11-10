@@ -1,3 +1,24 @@
+# Description 
+
+Cette règle détecte les modifications non autorisées dans la configuration du pare-feu Windows, ce qui peut indiquer une tentative d'altération des contrôles de sécurité du système.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=connectix source="*WinEventLog*" EventCode=4947
+| eval severity="High"
+| eval event_title="Modification des règles de pare-feu"
+```
+
+# Règle SIGMA
+
+```
 title: Modification des paramètres de pare-feu Windows
 logsource:
   product: windows
@@ -8,11 +29,8 @@ detection:
   condition: selection
 level: high
 description: Détecte les modifications non autorisées dans la configuration du pare-feu Windows.
+```
 
+# Explication
 
-
-
-
-index=connectix source="*WinEventLog*"  EventCode=4947
-| eval severity="High"
-| eval event_title="Modification des règles de pare-feu"
+Cette règle détecte les modifications des paramètres du pare-feu Windows en recherchant l'EventID 4947 dans les journaux de sécurité. Des changements dans les règles du pare-feu peuvent indiquer une tentative de contournement des contrôles de sécurité.

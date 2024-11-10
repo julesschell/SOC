@@ -1,3 +1,26 @@
+# Description 
+
+Cette règle détecte des processus lancés par `cmd.exe`, ce qui peut être un indicateur d'une tentative de dissimulation d'activités malveillantes.
+
+# Criticité : **MEDIUM**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=test EventCode=1 ParentImage="*\\cmd.exe"
+| stats count by _time, Computer, User, ParentImage, Image
+| rename Computer as host, User as user, ParentImage as parent_image, Image as image
+| eval severity="medium"
+| eval event_title="Détection d'un processus masqué par cmd.exe"
+```
+
+# Règle SIGMA
+
+```
 title: Processus masqué par cmd.exe
 logsource:
   product: windows
@@ -5,18 +28,13 @@ logsource:
 detection:
   selection:
     EventID: 1
-    ParentImage: ""*\\cmd.exe""
+    ParentImage: "*\\cmd.exe"
     User: "!SYSTEM"  # Exclure les utilisateurs système
   condition: selection
 level: medium
 description: Détecte des processus lancés par cmd.exe, potentiellement pour dissimuler des commandes.
+```
 
+# Explication
 
-
-
-
-index=test EventCode=1 ParentImage="*\\cmd.exe"
-| stats count by _time, Computer, User, ParentImage, Image
-| rename Computer as host, User as user, ParentImage as parent_image, Image as image
-| eval severity="medium"
-| eval event_title="Détection d'un processus masqué par cmd.exe"
+Cette règle est déclenchée lorsqu'un processus est lancé par `cmd.exe`, excluant les événements où l'utilisateur est `SYSTEM`. Les attaquants utilisent souvent `cmd.exe` pour masquer ou exécuter des commandes malveillantes sans que cela soit visible.

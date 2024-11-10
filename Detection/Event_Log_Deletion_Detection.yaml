@@ -1,3 +1,24 @@
+# Description 
+
+Cette règle détecte la suppression des journaux d'événements sur un système Windows, ce qui peut indiquer une tentative de dissimulation des activités malveillantes.
+
+# Criticité : **HIGH**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index="test" EventCode=1102 source="WinEventLog:Security"
+| eval severity="High"
+| eval event_title="Suppression des journaux d'événements"
+```
+
+# Règle SIGMA
+
+```
 title: Suppression des journaux d'événements Windows
 logsource:
   product: windows
@@ -8,10 +29,8 @@ detection:
   condition: selection
 level: high
 description: Détecte la suppression des journaux d'événements, souvent signe d'une tentative de dissimulation.
+```
 
+# Explication
 
-
-
-index="test" EventCode=1102 source="WinEventLog:Security"
-| eval severity="High"
-| eval event_title="Suppression des journaux d'événements"
+La règle surveille les événements Windows (EventID 1102) relatifs à la suppression des journaux d'événements, ce qui peut être un signe de tentative de suppression de preuves ou de dissimulation d'activités malveillantes.

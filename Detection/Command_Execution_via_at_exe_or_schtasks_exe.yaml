@@ -1,3 +1,25 @@
+# Description 
+
+Cette règle sera levée en cas d'utilisation d'outils de planification comme at.exe ou schtasks.exe pour l'exécution de commandes malveillantes.
+
+# Criticité : **MEDIUM**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index="connectix"  sourcetype="wineventlog"  EventCode=4688 
+| search (New_Process_Name="*\\at.exe" OR New_Process_Name="*\\schtasks.exe")
+| eval severity="Medium"
+| eval event_title="Exécution de commandes via at.exe ou schtasks.exe"
+```
+
+# Règle SIGMA
+
+```
 title: Utilisation d'outils de planification pour exécution de commandes
 logsource:
   product: windows
@@ -12,12 +34,8 @@ detection:
   condition: selection or selection2
 level: medium
 description: Détecte l'utilisation d'at.exe ou de schtasks.exe pour planifier l'exécution de tâches malveillantes.
+```
 
+# Explication
 
-
-
-
-index="connectix"  sourcetype="wineventlog"  EventCode=4688 
-| search (New_Process_Name="*\\at.exe" OR New_Process_Name="*\\schtasks.exe")
-| eval severity="Medium"
-| eval event_title="Exécution de commandes via at.exe ou schtasks.exe"
+Cette règle détecte l'utilisation des outils de planification Windows (at.exe et schtasks.exe) pour l'exécution de tâches, ce qui peut indiquer une tentative de planification de tâches malveillantes.

@@ -1,3 +1,26 @@
+# Description 
+
+Cette règle sera levée en cas de modification ou création de tâches planifiées, une méthode courante pour la persistance.
+
+# Criticité : **MEDIUM**
+
+# Outils
+
+Sysmon
+
+# Règle SPL
+
+```
+index=test EventCode=4698
+| stats count by _time, Computer, User, TaskName
+| rename Computer as host, User as user
+| eval severity="Medium"
+| eval event_title="Création d'une tache planifiées"
+```
+
+# Règle SIGMA
+
+```
 title: Modification des tâches planifiées
 logsource:
   product: windows
@@ -8,13 +31,8 @@ detection:
   condition: selection
 level: medium
 description: Détecte la création des tâches planifiées, une méthode courante pour la persistance.
+```
 
+# Explication
 
-
-
-
-index=test EventCode=4698
-| stats count by _time, Computer, User, TaskName
-| rename Computer as host, User as user
-| eval severity="Medium"
-| eval event_title="Création d'une tache planifiées"
+Cette règle détecte la création de tâches planifiées via l'événement Windows (EventID 4698), ce qui peut être utilisé par des attaquants pour garantir la persistance de leur accès.

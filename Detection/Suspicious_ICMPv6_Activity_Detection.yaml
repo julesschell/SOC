@@ -1,3 +1,27 @@
+# Description 
+
+Cette règle détecte une activité ICMP IPv6 à fort volume sur une période courte, ce qui pourrait indiquer des activités de reconnaissance, du tunneling ICMP ou des attaques par déni de service (DoS).
+
+# Criticité : **HIGH**
+
+# Outils
+
+Suricata
+
+# Règle SPL
+
+```
+index=connectix sourcetype="suricata" proto="IPv6-ICMP"
+| bin _time span=1m
+| stats count by src_ip, dest_ip, _time
+| where count > 50
+| eval severity="High"
+| eval event_title="ICMP IPv6 scan"
+```
+
+# Règle SIGMA
+
+```
 title: Suspicious ICMP IPv6 Activity Detection
 id: f4bcb700-8765-4a9e-b6c7-72d2e9e9e3c4
 description: Detects high volume of IPv6 ICMP activity in a short period, which may indicate reconnaissance, ICMP tunneling, or DoS attacks.
@@ -25,14 +49,8 @@ tags:
     - attack.reconnaissance
     - attack.exfiltration
     - network.connection
+```
 
+# Explication
 
-
-
-
-index=connectix sourcetype="suricata" proto="IPv6-ICMP"
-| bin _time span=1m
-| stats count by src_ip, dest_ip, _time
-| where count > 50
-| eval severity="High"
-| eval event_title="ICMP IPv6 scan"
+La règle détecte un volume élevé d'activités ICMP IPv6 entre des adresses source et destination sur une période de 1 minute. Cela peut être le signe d'une reconnaissance réseau, d'une exfiltration de données par tunneling ICMP, ou d'attaques par déni de service (DoS) utilisant ICMP.
