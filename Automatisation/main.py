@@ -23,7 +23,7 @@ service = client.connect(
     port='8089',
     scheme='https',
     username='joshua.guyot',
-    password='akn3RkNr'
+    password=''
 )
 
 # Requête de recherche Splunk
